@@ -1,0 +1,62 @@
+{
+  "feature_names": [
+    "soil_type",
+    "crop_type",
+    "crop_stage",
+    "soil_moisture_before",
+    "temperature_before",
+    "humidity_before",
+    "rainfall_forecast_before",
+    "wind_speed_before",
+    "solar_radiation_before",
+    "test_dose_applied",
+    "soil_moisture_after",
+    "temperature_after",
+    "humidity_after",
+    "rainfall_forecast_after",
+    "wind_speed_after",
+    "solar_radiation_after",
+    "moisture_gain"
+  ],
+  "cat_features": [
+    "soil_type",
+    "crop_type",
+    "crop_stage"
+  ],
+  "cat_feature_indices": [
+    0,
+    1,
+    2
+  ],
+  "num_features": [
+    "soil_moisture_before",
+    "temperature_before",
+    "humidity_before",
+    "rainfall_forecast_before",
+    "wind_speed_before",
+    "solar_radiation_before",
+    "test_dose_applied",
+    "soil_moisture_after",
+    "temperature_after",
+    "humidity_after",
+    "rainfall_forecast_after",
+    "wind_speed_after",
+    "solar_radiation_after",
+    "moisture_gain"
+  ],
+  "cat_unique_values": {
+    "soil_type": [
+      "Sandy clay loam"
+    ],
+    "crop_type": [
+      "Tomato"
+    ],
+    "crop_stage": [
+      "Flowering",
+      "Maturity",
+      "Seedling",
+      "Vegetative"
+    ]
+  },
+  "target_column": "water_required"
+}
