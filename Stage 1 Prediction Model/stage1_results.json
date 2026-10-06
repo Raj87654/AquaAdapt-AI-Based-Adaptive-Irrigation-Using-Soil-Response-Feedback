@@ -1,0 +1,34 @@
+{
+  "metrics": {
+    "mae": 3.2562,
+    "mse": 22.2338,
+    "rmse": 4.7153,
+    "r2": 0.9336
+  },
+  "feature_importance": {
+    "soil_type": 0.0,
+    "crop_type": 0.0,
+    "crop_stage": 24.1482,
+    "soil_moisture_before": 19.6611,
+    "temperature_before": 17.0345,
+    "humidity_before": 6.2948,
+    "rainfall_forecast_before": 15.411,
+    "wind_speed_before": 9.6636,
+    "solar_radiation_before": 7.7867
+  },
+  "residual_stats": {
+    "mean": -0.2525,
+    "std": 4.7124,
+    "max_abs": 24.6959,
+    "min": -24.6959,
+    "max": 16.9743
+  },
+  "dataset_info": {
+    "sheet": "Stage1_Initial_Model",
+    "total_records": 3000,
+    "train_records": 2400,
+    "test_records": 600,
+    "crop": "Tomato",
+    "soil": "Sandy clay loam"
+  }
+}
