@@ -3,6 +3,7 @@
 ### AI-Based Adaptive Irrigation Using Soil Response Feedback
 
 AquaAdapt is a smart irrigation system that uses **AI, sensor data, and real-time soil feedback** to make better irrigation decisions and reduce water wastage. 
+Live Demo : https://aquaadapt-ai-based-adaptive-irrigation-using-soil-response-fee.streamlit.app/
 ---
 
 ## 💡 Problem Statement
