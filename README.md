@@ -42,7 +42,7 @@ Observe → Predict → Test → Observe Response → Adapt → Irrigate
 ```
 🌱 Initial Soil Conditions
     ↓
-🤖 Stage 1 — CatBoost Prediction
+🤖 Stage 1 — Extra Trees Prediction
     ↓
 💧 Initial Water Requirement
     ↓
@@ -65,9 +65,9 @@ The goal is to make irrigation **adaptive, data-driven, and water-efficient**.
 
 ---
 
-## 🧠 Stage 1 — CatBoost Initial Model
+## 🧠 Stage 1 — Extra Trees Initial Model
 
-* **Algorithm:** CatBoost Regression
+* **Algorithm:** Extra Trees Regression
 * **Input:** Pre-irrigation field conditions (soil type, crop type, crop stage, soil moisture, temperature, humidity, rainfall forecast, wind speed, solar radiation)
 * **Output:** Initial water requirement (litres)
 * **Dataset:** Tomato — Sandy clay loam (3,000 records)
@@ -77,7 +77,7 @@ Stage 1 uses only the **initial field conditions** to make a prediction, before 
 
 ## 🧠 Stage 2 — Adaptive Prediction Model
 
-* **Algorithm:** CatBoost Regression
+* **Algorithm:** Extra Trees Regression
 * **Input:** All Stage 1 inputs + post-test-dose observations (test dose applied, soil moisture after, temperature after, humidity after, rainfall forecast after, wind speed after, solar radiation after, moisture gain)
 * **Output:** Final adaptive water requirement (litres)
 * **Sheet:** `Stage2_Adaptive_Model`
@@ -98,7 +98,7 @@ The system runs both models as a pipeline:
 
 | Component    | Technology               |
 |-------------|--------------------------|
-| ML Model    | CatBoost Regression      |
+| ML Model    | Extra Trees Regression     |
 | Language    | Python 3.11              |
 | Data        | Pandas, NumPy, OpenPyXL  |
 | Evaluation  | Scikit-learn             |
@@ -127,14 +127,14 @@ AquaAdapt/
 │
 ├── Stage 1 Prediction Model/     # Stage 1 dataset, scripts, and model
 │   ├── Tomato_Sandy_Clay_Loam_3000_Dataset.xlsx
-│   ├── stage1_catboost_model.cbm  # Trained Stage 1 model
+│   ├── stage1_extra_trees_model.joblib  # Trained Stage 1 model
 │   ├── model_metadata.json        # Stage 1 features + metrics
 │   ├── stage1_results.json        # Saved evaluation metrics
 │   ├── train.py                   # Stage 1 training script
 │   └── stage1_evaluation.py       # Evaluation display script
 │
-└── Stage 2 Prediction Model/     # Existing Stage 2 (untouched)
-    ├── aquaadapt_catboost_model.cbm
+└── Stage 2 Prediction Model/     # Stage 2 dataset, scripts, and model
+    ├── stage2_extra_trees_model.joblib
     ├── model_metadata.json
     ├── train.py
     ├── predict.py
@@ -170,9 +170,9 @@ python "Stage 1 Prediction Model/train.py"
 
 This will:
 - Load the dataset from the `Stage1_Initial_Model` sheet
-- Train a CatBoost model
+- Train an Extra Trees model
 - Evaluate with MAE, MSE, RMSE, R²
-- Save the model to `Stage 1 Prediction Model/stage1_catboost_model.cbm`
+- Save the model to `Stage 1 Prediction Model/stage1_extra_trees_model.joblib`
 - Save metadata + metrics to `Stage 1 Prediction Model/model_metadata.json`
 - Save evaluation results to `Stage 1 Prediction Model/stage1_results.json`
 
@@ -204,8 +204,8 @@ python "Stage 1 Prediction Model/stage1_evaluation.py"
 
 * The dataset is specific to **Tomato** crops on **Sandy clay loam** soil.
 * The UI is designed to support additional crops and soil types in the future.
-* Stage 2 model was trained separately and is reused without modification.
-* All predictions are made by the actual trained CatBoost models — no hardcoded or random values.
+* Extra Trees Regression was selected after comparative evaluation against other regression models on the current synthetic dataset. It achieved the best performance among the evaluated candidate models.
+* All predictions are made by the actual trained Extra Trees models — no hardcoded or random values.
 
 ---
 

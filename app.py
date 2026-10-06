@@ -295,7 +295,7 @@ with st.sidebar:
 
     steps = [
         ("🌱", "Initial Soil Conditions"),
-        ("🤖", "Stage 1 — CatBoost Prediction"),
+        ("🤖", "Stage 1 — Extra Trees Prediction"),
         ("💧", "Initial Water Requirement"),
         ("🧪", "Small Test Dose Applied"),
         ("📊", "Observe Soil Response"),
@@ -324,7 +324,7 @@ with st.sidebar:
         <div class="glass-card" style="padding:16px;">
             <div class="section-title">Stage 1 — Initial Model</div>
             <p style="color:#aaa; font-size:0.85rem; margin:4px 0;">
-                <b>Algorithm:</b> CatBoost Regression<br>
+                <b>Algorithm:</b> Extra Trees Regression<br>
                 <b>Target:</b> Water Required (L)<br>
                 <b>Dataset:</b> {s1_info.get('crop', 'Tomato')} — {s1_info.get('soil', 'Sandy clay loam')}<br>
                 <b>Records:</b> {s1_info.get('total_records', 3000)}<br>
@@ -349,7 +349,7 @@ with st.sidebar:
     <div class="glass-card" style="padding:16px;">
         <div class="section-title">Stage 2 — Adaptive Model</div>
         <p style="color:#aaa; font-size:0.85rem; margin:4px 0;">
-            <b>Algorithm:</b> CatBoost Regression<br>
+            <b>Algorithm:</b> Extra Trees Regression<br>
             <b>Purpose:</b> Adaptive correction after test dose<br>
             <b>Extra inputs:</b> Post-test-dose soil response
         </p>
@@ -677,6 +677,6 @@ if run_clicked:
 st.markdown('<div class="custom-divider"></div>', unsafe_allow_html=True)
 st.markdown("""
 <div style="text-align:center; padding:16px 0; color:rgba(255,255,255,0.25); font-size:0.78rem;">
-    AquaAdapt &nbsp;•&nbsp; AI-Based Adaptive Irrigation &nbsp;•&nbsp; CatBoost Regression
+    AquaAdapt &nbsp;•&nbsp; AI-Based Adaptive Irrigation &nbsp;•&nbsp; Extra Trees Regression
 </div>
 """, unsafe_allow_html=True)

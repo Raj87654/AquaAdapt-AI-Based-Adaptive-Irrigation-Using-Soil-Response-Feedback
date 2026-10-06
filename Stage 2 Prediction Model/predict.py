@@ -5,15 +5,15 @@ Loads the trained CatBoost model and asks the user for field conditions
 through the terminal, then predicts the required irrigation water (litres).
 """
 
+import joblib
 import json
 import pandas as pd
-from catboost import CatBoostRegressor
 
 
 # ----------------------------------------------
 # 1. Configuration
 # ----------------------------------------------
-MODEL_PATH = "aquaadapt_catboost_model.cbm"
+MODEL_PATH = "stage2_extra_trees_model.joblib"
 META_PATH = "model_metadata.json"
 
 
@@ -23,8 +23,7 @@ META_PATH = "model_metadata.json"
 with open(META_PATH, "r") as f:
     meta = json.load(f)
 
-model = CatBoostRegressor()
-model.load_model(MODEL_PATH)
+model = joblib.load(MODEL_PATH)
 
 feature_names   = meta["feature_names"]
 cat_features    = meta["cat_features"]

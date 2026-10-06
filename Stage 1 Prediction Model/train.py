@@ -1,15 +1,15 @@
 """
-AquaAdapt — Stage 1 CatBoost Regression Training
+AquaAdapt — Stage 1 Extra Trees Regression Training
 ===================================================
-Trains a CatBoostRegressor to predict the INITIAL irrigation water
+Trains an ExtraTreesRegressor to predict the INITIAL irrigation water
 requirement (litres) using ONLY pre-irrigation field conditions.
 
 Uses the 'Stage1_Initial_Model' sheet from the Excel dataset.
 
 Outputs:
-  - models/stage1_catboost_model.cbm   (trained model)
-  - models/stage1_metadata.json        (features + evaluation metrics)
-  - evaluation/stage1_results.json     (detailed evaluation results)
+  - stage1_extra_trees_model.joblib   (trained model)
+  - model_metadata.json        (features + evaluation metrics)
+  - stage1_results.json     (detailed evaluation results)
 """
 
 import os
@@ -17,14 +17,17 @@ import sys
 import json
 import numpy as np
 import pandas as pd
-from catboost import CatBoostRegressor
+import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
 
 # ---------------------------------------------------------------------------
 # 1. Configuration
 # ---------------------------------------------------------------------------
-# Resolve paths relative to the project root (one level up from training/)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 DATASET_PATH = os.path.join(
@@ -34,7 +37,7 @@ DATASET_PATH = os.path.join(
 SHEET_NAME = "Stage1_Initial_Model"
 
 MODEL_DIR = os.path.join(PROJECT_ROOT, "Stage 1 Prediction Model")
-MODEL_PATH = os.path.join(MODEL_DIR, "stage1_catboost_model.cbm")
+MODEL_PATH = os.path.join(MODEL_DIR, "stage1_extra_trees_model.joblib")
 META_PATH = os.path.join(MODEL_DIR, "model_metadata.json")
 
 EVAL_DIR = os.path.join(PROJECT_ROOT, "Stage 1 Prediction Model")
@@ -56,7 +59,7 @@ os.makedirs(EVAL_DIR, exist_ok=True)
 # 3. Load dataset
 # ---------------------------------------------------------------------------
 print("=" * 60)
-print("  AQUAADAPT — STAGE 1 MODEL TRAINING")
+print("  AQUAADAPT — STAGE 1 MODEL TRAINING (Extra Trees)")
 print("=" * 60)
 
 if not os.path.exists(DATASET_PATH):
@@ -88,11 +91,6 @@ num_features = X.select_dtypes(include=["number"]).columns.tolist()
 print(f"\n  Categorical features ({len(cat_features)}): {cat_features}")
 print(f"  Numerical features  ({len(num_features)}): {num_features}")
 
-cat_feature_indices = [X.columns.get_loc(c) for c in cat_features]
-cat_unique_values = {
-    col: sorted(X[col].unique().tolist()) for col in cat_features
-}
-
 # ---------------------------------------------------------------------------
 # 6. Train / test split
 # ---------------------------------------------------------------------------
@@ -103,21 +101,23 @@ print(f"\n[OK] Train set: {X_train.shape[0]} rows")
 print(f"[OK] Test  set: {X_test.shape[0]} rows")
 
 # ---------------------------------------------------------------------------
-# 7. Train CatBoostRegressor
+# 7. Build Pipeline and Train ExtraTreesRegressor
 # ---------------------------------------------------------------------------
-print("\n>>> Training Stage 1 CatBoost model ...\n")
+print("\n>>> Training Stage 1 Extra Trees model ...\n")
 
-model = CatBoostRegressor(
-    iterations=1000,
-    learning_rate=0.05,
-    depth=8,
-    loss_function="RMSE",
-    cat_features=cat_feature_indices,
-    verbose=200,
-    random_seed=RANDOM_STATE,
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('cat', OneHotEncoder(handle_unknown='ignore'), cat_features)
+    ],
+    remainder='passthrough'
 )
 
-model.fit(X_train, y_train, eval_set=(X_test, y_test), early_stopping_rounds=50)
+model = Pipeline(steps=[
+    ('preprocessor', preprocessor),
+    ('regressor', ExtraTreesRegressor(n_estimators=300, random_state=RANDOM_STATE, n_jobs=-1, min_samples_leaf=1))
+])
+
+model.fit(X_train, y_train)
 print("\n[OK] Training complete!")
 
 # ---------------------------------------------------------------------------
@@ -140,55 +140,24 @@ print(f"  R²   : {r2:.4f}")
 print("=" * 60)
 
 # ---------------------------------------------------------------------------
-# 9. Feature importance
+# 9. Save model
 # ---------------------------------------------------------------------------
-importances = model.get_feature_importance()
-feature_importance = dict(zip(X.columns.tolist(), importances.tolist()))
-
-print("\n  Feature Importance:")
-for feat, imp in sorted(feature_importance.items(), key=lambda x: -x[1]):
-    print(f"    {feat:30s} : {imp:.2f}")
-
-# ---------------------------------------------------------------------------
-# 10. Actual vs Predicted sample
-# ---------------------------------------------------------------------------
-comparison_df = pd.DataFrame({
-    "actual": y_test.values,
-    "predicted": y_pred,
-    "residual": y_test.values - y_pred,
-})
-
-print("\n  Actual vs Predicted (first 10 rows):")
-print(comparison_df.head(10).to_string(index=False))
-
-print(f"\n  Mean residual          : {comparison_df['residual'].mean():.4f}")
-print(f"  Std of residuals       : {comparison_df['residual'].std():.4f}")
-print(f"  Max absolute residual  : {comparison_df['residual'].abs().max():.4f}")
-
-# ---------------------------------------------------------------------------
-# 11. Save model
-# ---------------------------------------------------------------------------
-model.save_model(MODEL_PATH)
+joblib.dump(model, MODEL_PATH)
 print(f"\n[OK] Model saved -> {MODEL_PATH}")
 
 # ---------------------------------------------------------------------------
-# 12. Save metadata (features + evaluation metrics)
+# 10. Save metadata (features + evaluation metrics)
 # ---------------------------------------------------------------------------
 metadata = {
     "feature_names": X.columns.tolist(),
     "cat_features": cat_features,
-    "cat_feature_indices": cat_feature_indices,
     "num_features": num_features,
-    "cat_unique_values": cat_unique_values,
     "target_column": TARGET_COLUMN,
     "evaluation": {
         "mae": round(mae, 4),
         "mse": round(mse, 4),
         "rmse": round(rmse, 4),
         "r2": round(r2, 4),
-    },
-    "feature_importance": {
-        k: round(v, 4) for k, v in feature_importance.items()
     },
     "dataset_info": {
         "sheet": SHEET_NAME,
@@ -205,11 +174,16 @@ with open(META_PATH, "w") as f:
 print(f"[OK] Metadata saved -> {META_PATH}")
 
 # ---------------------------------------------------------------------------
-# 13. Save detailed evaluation results
+# 11. Save detailed evaluation results
 # ---------------------------------------------------------------------------
+comparison_df = pd.DataFrame({
+    "actual": y_test.values,
+    "predicted": y_pred,
+    "residual": y_test.values - y_pred,
+})
+
 eval_results = {
     "metrics": metadata["evaluation"],
-    "feature_importance": metadata["feature_importance"],
     "residual_stats": {
         "mean": round(comparison_df["residual"].mean(), 4),
         "std": round(comparison_df["residual"].std(), 4),

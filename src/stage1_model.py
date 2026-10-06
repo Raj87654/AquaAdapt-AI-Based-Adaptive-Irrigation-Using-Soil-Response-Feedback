@@ -1,5 +1,5 @@
 """
-AquaAdapt — Stage 1 Initial CatBoost Model
+AquaAdapt — Stage 1 Initial Extra Trees Model
 ============================================
 Provides a reusable prediction function for the Stage 1 model.
 Stage 1 predicts the initial water requirement based on pre-irrigation
@@ -17,14 +17,14 @@ Output:
 
 import os
 import json
+import joblib
 import pandas as pd
-from catboost import CatBoostRegressor
 
 # ---------------------------------------------------------------------------
 # Paths (relative to project root)
 # ---------------------------------------------------------------------------
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(_BASE_DIR, "Stage 1 Prediction Model", "stage1_catboost_model.cbm")
+MODEL_PATH = os.path.join(_BASE_DIR, "Stage 1 Prediction Model", "stage1_extra_trees_model.joblib")
 META_PATH = os.path.join(_BASE_DIR, "Stage 1 Prediction Model", "model_metadata.json")
 
 # ---------------------------------------------------------------------------
@@ -52,8 +52,7 @@ def _load():
             "Please train it first by running:  python 'Stage 1 Prediction Model/train.py'"
         )
 
-    _model = CatBoostRegressor()
-    _model.load_model(MODEL_PATH)
+    _model = joblib.load(MODEL_PATH)
 
     with open(META_PATH, "r") as f:
         _meta = json.load(f)
@@ -78,7 +77,7 @@ def predict_stage1(
 ) -> float:
     """
     Predict the initial water requirement (litres) using the Stage 1
-    CatBoost model.
+    Extra Trees model.
 
     Parameters
     ----------

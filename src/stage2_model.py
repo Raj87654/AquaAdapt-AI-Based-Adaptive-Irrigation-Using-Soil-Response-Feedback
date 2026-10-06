@@ -1,7 +1,7 @@
 """
 AquaAdapt — Stage 2 Adaptive Prediction Model
 ===============================================
-Wraps the EXISTING Stage 2 CatBoost model as a reusable prediction function.
+Wraps the EXISTING Stage 2 Extra Trees model as a reusable prediction function.
 
 Stage 2 takes the SAME pre-irrigation conditions PLUS post-test-dose
 observations and predicts the final adaptive water requirement.
@@ -18,8 +18,8 @@ Output:
 
 import os
 import json
+import joblib
 import pandas as pd
-from catboost import CatBoostRegressor
 
 # ---------------------------------------------------------------------------
 # Paths  —  reuse the existing Stage 2 model in its original location
@@ -27,7 +27,7 @@ from catboost import CatBoostRegressor
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _STAGE2_DIR = os.path.join(_BASE_DIR, "Stage 2 Prediction Model")
 
-MODEL_PATH = os.path.join(_STAGE2_DIR, "aquaadapt_catboost_model.cbm")
+MODEL_PATH = os.path.join(_STAGE2_DIR, "stage2_extra_trees_model.joblib")
 META_PATH = os.path.join(_STAGE2_DIR, "model_metadata.json")
 
 # ---------------------------------------------------------------------------
@@ -55,8 +55,7 @@ def _load():
             "The existing Stage 2 metadata file may have been moved."
         )
 
-    _model = CatBoostRegressor()
-    _model.load_model(MODEL_PATH)
+    _model = joblib.load(MODEL_PATH)
 
     with open(META_PATH, "r") as f:
         _meta = json.load(f)
@@ -91,7 +90,7 @@ def predict_stage2(
 ) -> float:
     """
     Predict the final adaptive water requirement (litres) using the
-    existing Stage 2 CatBoost model.
+    existing Stage 2 Extra Trees model.
 
     Parameters
     ----------
