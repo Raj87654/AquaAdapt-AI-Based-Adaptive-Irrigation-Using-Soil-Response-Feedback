@@ -1,16 +1,16 @@
 {
   "metrics": {
-    "mae": 2.8507,
-    "mse": 19.0605,
-    "rmse": 4.3658,
+    "mae": 2.8519,
+    "mse": 19.0788,
+    "rmse": 4.3679,
     "r2": 0.943
   },
   "residual_stats": {
-    "mean": -0.072,
-    "std": 4.3689,
-    "max_abs": 22.8334,
-    "min": -22.8334,
-    "max": 16.7811
+    "mean": -0.0726,
+    "std": 4.371,
+    "max_abs": 22.8176,
+    "min": -22.8176,
+    "max": 16.7397
   },
   "dataset_info": {
     "sheet": "Stage1_Initial_Model",

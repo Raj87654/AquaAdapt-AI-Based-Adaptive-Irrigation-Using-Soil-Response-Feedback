@@ -23,7 +23,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 # ---------------------------------------------------------------------------
 # 1. Configuration
@@ -107,9 +107,9 @@ print("\n>>> Training Stage 1 Extra Trees model ...\n")
 
 preprocessor = ColumnTransformer(
     transformers=[
-        ('cat', OneHotEncoder(handle_unknown='ignore'), cat_features)
-    ],
-    remainder='passthrough'
+        ('cat', OneHotEncoder(handle_unknown='ignore'), cat_features),
+        ('num', StandardScaler(), num_features)
+    ]
 )
 
 model = Pipeline(steps=[
